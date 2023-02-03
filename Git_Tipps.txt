@@ -1,0 +1,1024 @@
+XXXXXXXXXXXXXXXXXXXXX
+Git, Progit and Magit
+XXXXXXXXXXXXXXXXXXXXX
+
+# BASIC COMMANDS
+  	
+git --version
+git config --global user.name "..."
+git config --globel user.email "..."
+git config --global user.signingKey ghp_...
+git config --global alias.glog "log --graph --all --decorate --oneline"
+git config --global core.editor "emacs -nw"
+git config --global core.difftool "colordiff"
+git config --global help.autocorrect 0
+git config --list
+git help <command> | git <command> --help
+
+# START FROM LOCAL REPO
+git init
+git status
+git diff
+git add -A
+git reset
+git log
+git commit -m "message"
+
+# CLONE REMOTE REPO 
+git clone <url> <where to clone>
+git clone https://github.com/squawk7x/R.git .
+git remote -v
+git branch -a
+git diff
+git status
+git add -A
+git status
+git commit -m "message"
+git pull origin master|main
+git push origin master|main
+
+# COMMON WORKFLOW
+git branch <new branch>
+git branch
+git checkout <new branch>
+git add -A
+git commit -m "message"
+git push -u origin <new branch> 
+git branch -a
+
+# MERGE WITH MASTER
+git checkout master
+git pull origin master
+gir branch --merged
+git merge <new branch>
+git push <to> <from>
+git push origin master
+git branch --merged
+git branch -d <new branch>
+git branch -a
+git push origin --delete <new branch>
+
+------------------------------
+
+# FIXING COMMON MISTAKES AND UNDOING COMMITS
+
+git status
+
+HEAD
+        git diff --staged or diff --cached
+Index
+        git diff
+WD
+
+git diff <hash1> <hash2>
+
+# WRONG COMMIT MESSAGE
+git commit -m "wrong message"
+git commit --amend -m "corrected message"
+
+# WRONG FILE
+git add <corrected file>
+git commmit --amend 
+git log --stat
+
+# FILE ON WRONG BRANCH
+git log
+    log --graph --all --decorate --oneline
+    git log --grep='added'
+git checkout <feature branch>
+git cherry-pick <hash>
+git log
+git checkout master
+git log
+git reset --soft | --mixed | --hard  <hash>
+git log
+git status
+git clean -df  (untracked files)
+
+# UNDO GIT RESET HARD
+git reflog
+git checkout <hash>
+    -> we are on a 'attached HEAD state' branch
+    -> will be garbage collected
+    -> save it to a new branch
+git branch <backup>
+git branch
+git checkout master
+git branch
+    -> HEAD detached now in <backup> branch
+git checkout <backup>
+git log
+
+# UNDO COMMITS WHEN OTHER HAVE PULLED CHANGES
+  -> do NOT use git reset
+git revert <hash>
+git log
+git diff <hash1> <hash2>
+
+------------------------------
+
+# USING THE STASH COMMAND
+
+# (saving temporarily)
+
+git branch <new branch>
+git checkout <new branch>
+git diff 
+git stash save "Message"
+git diff
+    -> empty
+git status
+    -> nothing to commit
+    -> changes removed in source file
+git stash list
+    -> changes stored in stash 
+git stash save "Comment"
+git stash list -> stash@{0}
+git stash apply stash@{0}
+    -> changes inserted into source file
+git status
+git stash list
+    -> stash still in stash list
+[git checkout -- -]
+     [reset the spec?]
+git stash pop
+    -> changes inserted into source file + 
+    -> stash list is empty
+git stash list
+git stash drop stash{x}
+git stash clear
+
+git checkout master
+    <modify source file
+git status
+git diff
+    <want to change branch>
+git checkout <branchname>
+    -> before checkout needs commit OR:
+git stash save "moving to <branchname>"
+git status
+    -> nothing to commit
+git checkout <branchname>
+git stash pop
+git diff
+git add .
+git commit -m "Message"
+
+------------------------------
+
+# DIFF AND MERGE TOOLS
+
+git difftool
+
+git branch
+    -> with merge conflict
+git merge <testbranch>
+git mergetool
+git commit -m "Message"
+
+------------------------------
+
+# DIFFERENCIES GIT ADD
+
+(-A is default behavior)
+(-A includes now deleted files)
+
+git status
+git add -A (or --all or just git add, -A is default)
+    -> stages . and subdirectories
+    -> modified files
+    -> deleted files
+    -> untracked files
+git reset
+    -> unstaging all files
+git add (-A) sub_dir
+    -> stages sub_dir only
+    -> modified files
+    -> deleted files
+    -> untracked files
+git reset
+git add --no-all sub_dir
+    -> deteted files NOT included
+git reset
+git add -u (--update)
+    -> modified files
+    -> deleted files
+    -> NOT untracked files
+git reset
+git add -u sub_dir
+    -> sub_dir only
+    -> modified
+    -> deleted
+    -> NOT untracked files
+git reset
+git add (-A)
+    -> applies to full work
+git add (-A) .
+    -> applies to current directory
+git reset
+cd ./sub_dir
+git add (-A) .
+    -> applies only for sub_dir
+
+AVOID:
+git add (-A) *
+    -> * is bash 'thing'
+    -> does NOT detect deleted files
+    -> does NOT detect hidden files
+
+++++++++++++++++++++++++++++++
+
+# INTRODUCTION TO GIT - CORE CONCEPTS
+
+[bash: alias graph="git log --all --decorate --oneline --graph"]
+
+git config --global user.name "..."
+git config --global user.email "..."
+git config --list
+git status
+git log
+git diff
+    -> diff working tree and staging area
+
+git diff --staged
+    -> diff between staging area and last recent commit
+
+# REMOVE A FILE 
+git rm <file>
+    -> removed from stage area
+    -> and from working tree
+
+# UNDO A WORKING TREE CHANGE
+git checkout -- <file>
+
+# UNSTAGE A FILE
+git reset HEAD <file>
+    -> <file> modified and unstaged
+
+# RESTORE THE WORKING TREE
+git checkout -- <file>
+
+# RESTORE FILE FROM EARLIER COMMIT
+git log <file>
+git checkout <hash> -- <file>
+    -> <file> back in working tree
+    -> and in staging area
+
+++++++++++++++++++++++++++++++
+
+# INTRODUCTION TO GIT - BRANCHING AND MERGING
+
+# BRANCH
+
+git branch <branchname>
+git branch 
+
+HEAD points to the checked out branch
+     (normally not to a commit - see detached HEAD below)
+a branch points to a commit
+
+git checkout <branch>
+    -> moves HEAD pointer to this branch
+    -> updates the working directory!!!
+
+git switch <-> git checkout
+git log --all --decorate --oneline --graph
+[ bash: alias graph="git log --all --decorate --oneline --graph"]
+
+# FAST FORWARD MERGE
+  -> direct graph between branches
+  -> master just moves to the merge commit
+git checkout master
+git status
+git diff master..<branchname>
+git merge <branchname>
+    -> master and <branchname> point to same commit
+git branch --merged
+git branch -d <branchname>
+    -> <branchname> must be merged
+git branch -D <branchname>
+    -> be careful
+
+# 3-WAY MERGE / RECURSIVE STRATEGY
+    -> no direct graph between branches
+git merge <branchname>
+git branch --merged
+git branch -d <branchname>
+
+# MERGE CONFLICTS
+  -> same line in same file are changed
+git checkout -b <branchname>
+    -> creates and checkout <branchname>
+git commit -a -m "message"
+    -> stage and commit at same time
+git checkout master
+
+git merge <branchname>
+    -> CONFLICT...
+    -> Automatic merge failed...
+git status
+    -> 'you have unmerged paths.'
+git merge --abort
+git status
+    -> shows out of the merge process
+
+git merge <branchname>
+    -> conflicts are marked in file
+    -> use editor to solve the conflicts
+
+git add <filename>
+git status
+git commit
+    -> this commit finishes the merge process
+git branch -d <branchname>
+
+# DETACHED HEAD STATE
+
+git checkout <hash>
+    -> HEAD is pointing to a commit (not to a branch)
+git graph
+git checkout <master>
+    -> back to normal
+git graph
+
+git checkout <hash>
+git branch <branchname>
+    -> HEAD and new branch point to same <hash>
+    -> HEAD not yet connected to new branch
+git checkout <branchname>
+git graph
+
+
+# STASHING
+
+git checkout <branch>
+
+-> 'Please commit your changes or stash them ...'
+
+git stash
+git status
+    -> clean stage
+git stash list
+git stash apply
+    -> last stash
+git stash apply stash@{x}
+git stash pop
+    -> removes last stash
+git stage save "message"
+    -> for more detailed info in git stash list
+
+
+++++++++++++++++++++++++++++++
+
+# INTRODUCTION TO GIT - REMOTES
+
+git clone https://github.com/squawk7x/R.git .
+
+git remote
+    -> origin (default name)
+git remote -v
+    -> origin  https://github.com/squawk7x/R.git (fetch)
+    -> origin  https://github.com/squawk7x/R.git (push)
+
+
+# GIT PULL
+git pull
+    -> git fetch origin
+    -> git merge origin/main
+
+# GIT PUSH
+git push origin main
+
+# CREATE A GIT REMOTE ON A DIFFERENT GITHUB USER ACCOUNT
+# 	       2 CO-WORKERS SITUATION
+
+git remote add upstream https://github.com/OTHER USER/XY.git
+git remote -v
+(git remote remove upstream)
+
+
+# SYNC WITH UPSTREAM
+git graph
+git fetch upstream
+git graph
+    -> see new tracking branch
+git merge upstream/main
+    -> merges upstream to local branch
+    -> local master sync with upstream/main
+git push origin main
+    -> own Github repo sync with local and upstream
+
+# REMOTE BRANCHES
+  -> UPSTREAM owner has performed a MERGE/PULL to his Github repo
+  -> now cleanup own ORIGIN/MAIN an LOCAL repo
+
+git branch -a
+git branch -r
+
+******************************
+
+INTERMEDIATE TIPPS
+
+# COMMIT
+git commit -am "message"
+
+# ALIASES
+git config --global alias.glog "log --graph --all --decorate --oneline"
+
+# AMEND
+git commit --amend -m "amended message to last commit"
+git add .
+git commit --amend --no-edit
+
+# REVERT
+git revert <hash>
+
+# CODESPACES
+Github: push period key '.'
+	-> browser based Terminal
+	-> setup Github codespace
+
+# STASH
+git stash
+    -> saves changes in working directory for later use
+git pop
+git stash save <name>
+git stash list
+git stash apply
+
+# MASTER - MAIN
+post 2020 master -> main
+checkout <branch>
+git branch -M <new_branch_name>
+
+# BISECT 
+git bisect start
+git bisect bad
+git bisect good <hash>
+
+# AUTOSQUASH
+checkout <branch>
+git rebase master --interactive
+git commit -fixup <hash>
+git commit --squash <hash>
+git rebase -i --autosquash
+
+# HOOKS
+
+# DESTRUCTION
+  -> overwrite local code
+
+git fetch origin
+git reset --hard origin/main
+git clean -df
+rm -rf .git
+
+# BONUS
+  -> go back to previous branch
+git checkout -
+
+******************************
+
+# PROFESSIONAL TIPPS
+
+# PERFECT COMMIT
+git add -p <file>
+    -> interactive
+
+# BRANCHING STRATEGIES
+
+# PULL REQUESTS
+  -> based on branches, not on commits
+
+# MERGE CONFLICTS
+  -> merge, rebase, pull, stash apply, cherry-pick
+git merge --abort
+git rebase --abort
+
+# MERGE
+    -> can be done into master or into feature-branch
+    -> hashes unchanged
+git switch <to-branch>
+git merge <from-branch>
+    -> Fast-Forward
+    -> 3-Way
+
+# REBASE
+    -> new commits, new hashes
+    -> DO REBASE PUBLIC COMMITS
+git switch <from-branch, feature-branch>
+git rebase <to-branch, master>
+ 
+# SQUASH
+git rebase -i HEAD~4
+
+******************************
+
+# REWRITING GIT HISTORY
+
+# AMENDING COMMITS
+git commit --amend --no-edit
+    -> more files edit to the last commit
+
+# REWORDING COMMIT MESSAGES
+git rebase -i HEAD~3
+    -> r for rewording
+
+# DELETING COMMITS
+git rebase -i HEAD~3
+    -> d for drop
+
+# REORDERING COMMITS
+git rebase -i HEAD~3
+    -> reorder the picks with copy & paste
+
+# SQUASHING COMMITS
+git rebase -i HEAD~3
+    -> s for squash (preserve previous log msgs)
+    -> f for fixup (discard current log msgs)
+
+# SPLITTING COMMITS WITH MORE THAN 1 FILE
+git rebase -i HEAD~3
+    -> e for edit
+git status
+git reset HEAD~
+    -> unstage all those files
+    -> new branch rebase-i created
+git status
+    -> see untracked files
+git commit <file> -m "msg"
+git rebase continue
+    -> back on previous branch
+
+******************************
+
+git reflog
+git gc
+git clean -i
+
+# GLOBAL REGULAR EXPRESSION PRINT
+git grep '<search-term>'
+git archive <tree-ish> to <filename>
+git notes add <object>
+git notes list
+git notes show <object>
+git notes remove <hash>
+git config --global help.autocorrect 5
+git config --global alias.<alias> '<command>'
+
+
+******************************
+
+git cat-file -p HEAD
+git ls-tree -r HEAD
+git ls-files -s
+
+******************************
+
+		======
+		PROGIT
+		======
+	  
+# 1.6 Getting Started - First-Time Git Setup
+--------------------------------------------
+git config --list --show-origin
+--system -> /etc/gitconfig (Prio 3)
+--global -> ~/.gitconfig (Prio 2)
+--local  -> .git/config (Prio 1)
+
+
+# 2.1 Git Basics - Getting a Git Repository
+-------------------------------------------
+git init
+git clone <url> [dir]
+
+
+# 2.2 Git Basics - Recording Changes to the Repository
+------------------------------------------------------
+add
+  -> add new file
+  -> add modification
+  -> merge
+
+diff -> downwards to WD
+diff --staged/cached -> Oupwards to HEAD
+diff HEAD -> both
+difftool HEAD
+
+git rm
+git rm --cached
+git mv
+
+
+# 2.3 Git Basics - Viewing the Commit History
+---------------------------------------------
+git log --oneline --decorate --graph --all
+
+
+# 2.4 Git Basics - Undoing Things
+---------------------------------
+git commit --amend
+git checkout
+git reset
+git restore
+git revert
+
+
+# 2.5 Git Basics - Working with Remotes
+---------------------------------------
+git remote add [name] <url>
+git clone
+
+
+# 2.6 Git Basics - Tagging
+--------------------------
+
+# 2.7 Git Basics - Git Aliases
+------------------------------
+  git config --global alias.st status
+  git config --global alias.unstage 'reset HEAD --'
+  git reset HEAD -- <file>
+  git config --global alias.last 'log -1 HEAD'
+  git config --global alias.visual '!gitk'
+
+
+# 3.1 Git Branching - Branches in a Nutshell
+--------------------------------------------
+git branch <branchname>
+git switch -c <branch>
+git checkout -b <branch>
+    -> changes files in WD
+    -> sets HEAD to <branch>
+git switch -
+    -> return to previous branch
+
+
+# 3.2 Git Branching - Basic Branching and Merging
+-------------------------------------------------
+git checkout master
+git merge <branch>
+qqgit branch -d <branch>
+git branch --move
+git branch --move master main
+    -> rename branch
+    -> git push --set-upstream origin main
+    -> git push origin --delete master
+git push --set-upstream origin <corrected-branch-name>
+git push origin --delete <ad-branch-name>
+
+
+3.3 Git Branching - Branch Management
+-------------------------------------
+git branch --merged
+git branch --no-merged
+
+
+# 3.4 Git Branching - Branching Workflows
+-----------------------------------------
+skipped
+
+
+# 3.5 Git Branching - Remote Branches
+-------------------------------------
+git ls-remote <remote>
+git remote show <remote>
+<remote>/<branch>, origin/master
+git remote add <remote>
+git fetch <remote>
+
+    git push origin refs/heads/serverfix:refs/heads/serverfix
+    	     ==
+    git push origin serverfix:serverfix
+    	     ==
+    git push origin serverfix
+    	     ==
+    git push serverfix
+
+git config --global credential.helper cache
+
+    git pull <remote>
+    	     ==
+    git fetch <remote> + git merge <remote>
+
+fetch does NOT create local, editable copies ->
+git checkout -b serverfix origin/serverfix
+
+    git checkout -b <branch> <remote>/<branch>
+    	     ==
+    git checkout --track origin/serverfix
+    	     ==
+    git checkout serverfix
+    
+git checkout -b sf origin/serverfix    
+git branch --set-upstream-to origin/serverfix
+
+Note shorthand: @{u} or @{upstream}:
+git merge @{u}
+    ==
+git merge origin/master
+
+git branch -vv 
+git fetch --all; git branch -vv
+
+git push origin --delete serverfix
+
+
+# 3.6 Git Branching - Rebasing
+------------------------------
+master ⬭ <-- ⬭ <-- ⬭ <-- ⬭ 
+experiment     	⬭ <-- ⬭ <-- ⬭
+
+git checkout experiment
+git rebase master
+git checkout master
+git merge experiment
+
+master ⬭ <-- ⬭ <-- ⬭ <-- ⬭ 
+server      	⬭ <-- ⬭ <-- ⬭
+client		  ⬭ <-- ⬭ 
+
+you can:
+1. first rebase client
+git rebase --onto master server client
+git checkout master
+git merge client
+
+2. then rebase server
+git rebase <basebranch> <topicbranch>
+git rebase master server
+git checkout master
+git merge server
+
+
+git pull --rebase
+git config --global pull.rebase true
+
+
+# 4.1 Git on the Server - The Protocols
+---------------------------------------
+Local
+ git clone /srv/git/project.git
+ or:
+ git clone file:///srv/git/project.git
+ add group write permissions:
+ -> cd ../project.git
+ -> git init --bare --shared
+ or:
+ git init --bare --shared project.git
+ git remote add local_proj /srv/git/project.git
+
+HTTP
+ - smart
+ - dump
+
+SSH
+ git clone ssh://[user@]server/project.git
+ or:
+ git clone [user@]server:project.git
+
+GIT
+
+
+# 4.2 Git on the Server - Getting Git on a Server
+-------------------------------------------------
+	create an empty repo:
+git init --bare local_repo.git
+chmod o+w -R local_repo.git
+
+    	create a bare version of an existing .git 
+git clone --bare path/my_project path/my_project.git
+
+
+# 4.3 Git on the Server - Generating Your SSH Public Key
+--------------------------------------------------------
+ssh-keygen -o
+
+
+# 4.4 Git on the Server - Setting Up the Server
+-----------------------------------------------
+# on server:
+sudo adduser git
+su git
+cd
+mkdir .ssh && chmod 700 .ssh
+touch .ssh/authorized_keys && chmod 600 .ssh/authorized_keys
+cat /tmp/id_rsa.john.pub >> ~/.ssh/authorized_keys
+
+cd /srv/git
+mkdir project.git
+cd project.git
+git init --bare
+
+# on users's computer:
+cd myproject
+git init
+git add .
+git commit -m 'Initial commit'
+git remote add origin git@gitserver:/srv/git/project.git
+git push origin master
+
+
+4.5 Git on the Server - Git Daemon
+----------------------------------
+git daemon --reuseaddr --base-path=/srv/git/ /srv/git/
+
+
+# 4.7 Git on the Server - GitWeb
+--------------------------------
+
+git instaweb --http=apache2 start/stop
+
+
+
+# 7.1 Git Tools - Revision Selection
+------------------------------------
+-- -> separates git options and <filepath>
+git reset HEAD -- file.txt
+
+git rev-parse master -> hash
+git reflog -> HEAD{x}
+git show HEAD@{3}
+git show master@{yesterday}
+git log -g -> git reflog formatted like log
+
+^          -> ancestor
+~, ~~, ~3  -> ancestor(s)
+^1, ^2     -> the 2 ancestors after merge
+~3^2
+
+double dot ..
+git log master..feature 
+    -> commits reachable in feature, that are
+    -> NOT rechable in master
+
+git log ^feature master
+git log feature --not master
+
+HEAD^, HEAD~ -> ancestor of HEAD
+HEAD~5, HEAD@{5} -> ancestor no ...
+^HEAD -> not HEAD
+HEAD..master ->
+
+triple dot ...
+commits reachable by either of two references but not by both of them.
+git log master...feature
+git log --left-right master...feature
+
+
+# 7.2 Git Tools - Interactive Staging
+-------------------------------------
+git add -i(nteractive)
+git diff
+git diff --staged
+git diff HEAD
+
+# 7.3 Git Tools - Stashing and Cleaning
+---------------------------------------
+git stash, git stash push
+git stash list
+git stash apply, git stash apply@{0}
+git stash pop
+git stash drop
+
+git clean
+git stash all (safer)
+git clean -f -d -x -> f: force
+git clean -n -d -x -> n: preview of clean
+git clean -x -i    -> i: interactive
+
+
+# 7.4 Git Tools - Signing Your Work
+-----------------------------------
+skipped
+
+
+# 7.5 Git Tools - Searching
+---------------------------
+git grep -> searches in WD
+git log -S 100 --oneline
+
+
+# 7.6 Git Tools - Rewriting History
+-----------------------------------
+
+
+# 7.7 Git Tools - Reset Demystified
+-----------------------------------
+
+# CHECKOUT
+                    HEAD/LAST COMMIT   ↖ 
+                ↗                      ↗  git commit (<-> git reset --mixed)
+git checkout   ->  STAGING AREA / INDEX      
+                ↘                      ↖  git add (<-> git restore --staged <file>)
+                     WORKING DIRECTORY  ↗          (<-  git restore <file>)
+
+
+Reset
+    -> reset moves <hash> to the BRANCH that HEAD is pointing to !!!
+    -> HEAD~ the parent of HEAD
+
+git reset assumes HEAD or specify:
+git reset ... <hash> or git reset ... HEAD~:
+
+          --soft   ->   HEAD/LAST COMMIT   ↖ 
+                   ↗                      ↗  git commit
+git reset --mixed  ->  STAGING AREA / INDEX      
+                ↗  ↗                      ↖  git add
+          --hard   ->   WORKING DIRECTORY  ↗
+
+    --soft reverts  last git commit
+    --mixed reverts last git commit + git add
+    --hard reverts  last git commit + git add + working directory (dangerous)
+
+git reset <FILE> 
+    -> does NOT move HEAD 
+    -> just copies <file> to index
+
+git reset <hash> -- <file>
+    -> does NOT move HEAD
+    -> just copies <hash> to index
+
+git reset [--mixed] <file> == git restore --staged <file>
+
+
+# DIFFERENCIES CHECKOUT <-> RESET --HARD
+# Commit Level
+    -> RESET moves the BRANCH that HEAD points to
+    -> CHECKOUT moves HEAD 
+# File Level
+    -> CHECKOUT does NOT move HEAD
+
+
+                            HEAD Index  WD  safe
+Commit Level:
+reset --soft [commit]       REF   NO    NO   YES
+reset [commit]              REF   YES   NO   YES
+reset --hard [commit]       REF   YES   YES  NO
+checkout <commit>           HEAD  YES   YES  YES
+
+File Level:
+reset [commit] <paths>      NO    YES   NO   YES
+checkout [commit] <paths>   NO    YES   YES  NO
+
+
+# 10.1 Git Internals - Plumbing and Porcelain
+---------------------------------------------
+HEAD
+index
+objects directory
+refs directory
+
+# 10.2 Git Internals - Git Objects
+----------------------------------
+4 main object types:
+  - blobs
+  - trees
+  - commits
+  - tag
+
+key-value data store
+git hash-object
+git cat-flie
+master^{tree}
+
+
+# 10.3 Git Internals - Git References
+-------------------------------------
+3 GIT refs:
+  - heads
+  - tags
+  - remotes
+  
+detached HEAD
+  -> TAG
+  -> commit
+  -> remote branch
+
+git symbolic-ref HEAD
+
+
+# 10.4 Git Internals - Packfiles
+--------------------------------
+git gc
+    -> object/pack/pack-<hash>
+
+
+# 10.5 Git Internals - The Refspec
+----------------------------------
+git push origin --delete topic
+
+
+# 10.6 Git Internals - Transfer Protocols
+-----------------------------------------
+
+# 10.7 Git Internals - Maintenance and Data Recovery
+----------------------------------------------------
+git reflog
+git log -g
+git branch recover-branch <commit>
+if even reflog was lost:
+git fsck --full
+
+# 10.8 Git Internals - Environment Variables
+--------------------------------------------
+skipped
