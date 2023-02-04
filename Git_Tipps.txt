@@ -820,15 +820,108 @@ git push origin master
 
 4.5 Git on the Server - Git Daemon
 ----------------------------------
-git daemon --reuseaddr --base-path=/srv/git/ /srv/git/
+__________________________________
+
+nano etc/systemd/system/git-daemon.service:
+
+[Unit]
+Description=Start Git Daemon
+
+[Service]
+ExecStart=/usr/bin/git daemon --reuseaddr --base-path=/var/www/git/ /var/www/git/
+
+Restart=always
+RestartSec=500ms
+
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=git-daemon
+
+User=git
+Group=git
+
+[Install]
+WantedBy=multi-user.target
+__________________________________
+
+systemctl enable git-daemon
+systemctl start git-daemon
+systemctl status git-daemon
+systemctl stop git-daemon
+__________________________________
+
+cd /path/to/project.git
+touch git-daemon-export-ok
+__________________________________
+
+
+4.6 Git on the Server - Smart HTTP
+----------------------------------
+/etc/apache2/conf-enabled:
+__________________________________
+SetEnv GIT_PROJECT_ROOT /var/www/git
+SetEnv GIT_HTTP_EXPORT_ALL
+ScriptAlias /git/ /usr/lib/git-core/git-http-backend/
+
+<Files "git-http-backend">
+    AuthType Basic
+    AuthName "Git Access"
+    AuthUserFile /var/www/git/.htpasswd
+    Require expr !(%{QUERY_STRING} -strmatch '*service=git-rece>
+    Require valid-user
+</Files>
+__________________________________
+cd /var/www/git
+htpasswd -c /srv/git/.htpasswd git
+
+-> git clone http://localhost/git/latex.git
 
 
 # 4.7 Git on the Server - GitWeb
 --------------------------------
 
+with gitaweb:
 git instaweb --http=apache2 start/stop
 
 
+with Apache:
+/etc/apache2/apache2.conf:
+<Directory /var/www/>
+        Options Indexes FollowSymLinks
+        AllowOverride None
+        Require all granted
+</Directory>
+
+etc/apache2/sites-available/repos.conf:
+Listen 81
+<VirtualHost *:81>
+    Alias /repos "/var/www/repos"
+    <Location stable>
+        Allow from all
+    </Location>
+</VirtualHost>
+
+=> localhost:81/repos
+
+/etc/gitweb.conf:
+$projectroot = "/var/www/repos/";
+
+/repos/stable/hooks$ mv post-update.sample post-update
+
+/etc/apache2/sites-available/gitweb.conf:
+Listen 82
+<VirtualHost *:82>
+        DocumentRoot /var/www/repos
+        SetEnv GITWEB_CONFIG /etc/gitweb.conf
+        Alias /gitweb.css /usr/share/gitweb/static/gitweb.css
+        Alias /gitweb.js /usr/share/gitweb/static/gitweb.js
+        Alias /git-favicon.png /usr/share/gitweb/static/git-favicon.png
+        Alias /git-logo.png /usr/share/gitweb/static/git-logo.png
+        ScriptAlias /gitweb.cgi /usr/lib/cgi-bin/gitweb.cgi
+        DirectoryIndex gitweb.cgi
+</VirtualHost>
+
+=> localhost:82/gitweb
 
 # 7.1 Git Tools - Revision Selection
 ------------------------------------
