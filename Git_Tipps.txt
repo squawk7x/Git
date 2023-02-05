@@ -1067,6 +1067,45 @@ reset [commit] <paths>      NO    YES   NO   YES
 checkout [commit] <paths>   NO    YES   YES  NO
 
 
+# 7.8 Git Tools - Advanced Merging
+----------------------------------
+ 
+
+
+# 7.9 Git Tools - Rerere
+------------------------
+"reuse recorded resolution"
+git config --global rerere.enabled true
+git rerere status
+git rerere diff
+git ls-files -u
+
+recreate merge conflict:
+git checkout --conflict=merge <file>
+
+
+# 7.10 Git Tools - Debugging with Git
+-------------------------------------
+git blame -L x,y <file>
+    ^21eadd7 (squawk7x 2023-02-05 16:58:06 +0100 1) 1
+    b2631345 (squawk7x 2023-02-05 16:48:50 +0100 2) 2
+    -> ^ means here: not changed since Initial commit
+
+git bisect [start|bad|good <commit>|replay|reset]
+
+
+# 7.11 Git Tools - Submodules
+-----------------------------
+git submodule add https://...
+
+
+# 7.12 Git Tools - Bundling
+---------------------------
+git bundle [create|list-heads|unbundle|verify]
+git bundle create repo.bundle HEAD master
+git clone repo.bundle repo
+
+
 # 7.13 Git Tools - Replace
 --------------------------
 separate master branch at commit:
@@ -1077,11 +1116,12 @@ truncate:
 -> rebase commit onto it => new master created
 -> delete new_branch
 
-echo 'message...' | git commit-tree <commit^>^{tree}
-git rebase --onto <overlap_commit> <commit>
+git commit-tree <commit^>^{tree} -m 'message...'
+-> overlap_commit SHA1-HASH
+git rebase --onto <overlap_commit> <commit^>
 git branch -D <new_branch>
 
-restore former original tree:
+restore original tree:
 git clone https://...
 git remote add project-history https:...
 git replace <commit> <commit>
@@ -1161,6 +1201,7 @@ git push origin --delete topic
 # 10.6 Git Internals - Transfer Protocols
 -----------------------------------------
 
+
 # 10.7 Git Internals - Maintenance and Data Recovery
 ----------------------------------------------------
 git reflog
@@ -1168,6 +1209,7 @@ git log -g
 git branch recover-branch <commit>
 if even reflog was lost:
 git fsck --full
+
 
 # 10.8 Git Internals - Environment Variables
 --------------------------------------------
