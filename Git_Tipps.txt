@@ -923,6 +923,19 @@ Listen 82
 
 => localhost:82/gitweb
 
+git clone ssh://andreas@localhost/var/www/repos/gittipps/
+
+
+# 4.8 Git on the Server - GitLab
+--------------------------------
+skipped
+
+
+# 4.9 Git on the Server - Third Party Hosted Options
+----------------------------------------------------
+Github
+
+
 # 7.1 Git Tools - Revision Selection
 ------------------------------------
 -- -> separates git options and <filepath>
@@ -1054,6 +1067,36 @@ reset [commit] <paths>      NO    YES   NO   YES
 checkout [commit] <paths>   NO    YES   YES  NO
 
 
+# 7.13 Git Tools - Replace
+--------------------------
+separate master branch at commit:
+git branch <new_branch> <commit>
+
+truncate:
+-> create an overlap-commit
+-> rebase commit onto it => new master created
+-> delete new_branch
+
+echo 'message...' | git commit-tree <commit^>^{tree}
+git rebase --onto <overlap_commit> <commit>
+git branch -D <new_branch>
+
+restore former original tree:
+git clone https://...
+git remote add project-history https:...
+git replace <commit> <commit>
+
+
+# 7.14 Git Tools - Credential Storage
+-------------------------------------
+HTTP Protokoll easy authentification:
+git config --global credential.helper cache
+git config --global credential.helper 'store --file ~/.my-credentials'
+
+git credential (fill|approve|reject)
+
+
+
 # 10.1 Git Internals - Plumbing and Porcelain
 ---------------------------------------------
 HEAD
@@ -1088,6 +1131,20 @@ detached HEAD
   -> remote branch
 
 git symbolic-ref HEAD
+
+
+# 7.13 Git Tools - Replace
+--------------------------
+
+
+
+# 7.14 Git Tools - Credential Storage
+-------------------------------------
+HTTP -> every connection needs authentification
+git config --global credential.helper cache
+git config --global credential.helper 'store --file ~/.my-credentials'
+
+git credential -> interactive shell
 
 
 # 10.4 Git Internals - Packfiles
